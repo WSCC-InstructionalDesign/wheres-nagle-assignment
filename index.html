@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Where's Nagle? - Extra Credit Assignment</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            padding: 20px;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .assignment-tabs {
+            display: flex;
+            margin-bottom: 30px;
+            background: #f1f3f4;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+
+        .tab-button.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-button:hover:not(.active) {
+            background: #e8eaf6;
+        }
+
+        .assignment-option {
+            display: none;
+            padding: 25px;
+            background: #f8f9ff;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+
+        .assignment-option.active {
+            display: block;
+        }
+
+        .assignment-option h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .requirements {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #e1e5e9;
+        }
+
+        .requirements h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .requirements ul {
+            padding-left: 20px;
+        }
+
+        .requirements li {
+            margin: 8px 0;
+            color: #555;
+        }
+
+        .image-gallery {
+            margin-top: 30px;
+        }
+
+        .gallery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .gallery-header h3 {
+            color: #333;
+            font-size: 1.3rem;
+        }
+
+        .gallery-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            padding: 8px 15px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            width: 150px;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .view-toggle {
+            display: flex;
+            background: #f1f3f4;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .view-btn {
+            padding: 8px 15px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
+        }
+
+        .view-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .image-grid.large {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
+
+        .image-item {
+            position: relative;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .image-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
+                        linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 0.8rem;
+        }
+
+        .actual-image {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .image-grid.large .actual-image {
+            height: 150px;
+        }
+
+        .image-error {
+            width: 100%;
+            height: 100px;
+            background: #ffebee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #c62828;
+            font-size: 0.8rem;
+            text-align: center;
+            border: 2px dashed #ef5350;
+        }
+
+        .image-grid.large .image-placeholder {
+            height: 150px;
+        }
+
+        .image-number {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .selected {
+            border: 3px solid #667eea;
+            background: #f0f4ff;
+        }
+
+        .selection-counter {
+            position: sticky;
+            top: 20px;
+            background: #667eea;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            z-index: 100;
+        }
+
+        .selected-images {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #e1e5e9;
+        }
+
+        .selected-images h4 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .selected-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .selected-tag {
+            background: #667eea;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .selected-tag:hover {
+            background: #5a6fd8;
+        }
+
+        .remove-selected {
+            margin-left: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .submission-section {
+            background: #f8f9ff;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 30px;
+            border: 2px dashed #667eea;
+        }
+
+        .submission-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .submit-btn {
+            background: #667eea;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .assignment-tabs {
+                flex-direction: column;
+            }
+
+            .gallery-controls {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .search-box {
+                width: 120px;
+            }
+
+            .image-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+                gap: 10px;
+            }
+
+            .image-grid.large {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+
+        .instructions-highlight {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .instructions-highlight strong {
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Where's Nagle?</h1>
+            <p>Extra Credit Assignment - Find Mike Nagle in Historical Photos!</p>
+        </div>
+
+        <div class="content">
+            <div class="assignment-tabs">
+                <button class="tab-button active" onclick="switchTab('option1')">Option 1: Historical Locations</button>
+                <button class="tab-button" onclick="switchTab('option2')">Option 2: Michigan Photos</button>
+            </div>
+
+            <div id="option1" class="assignment-option active">
+                <h3>📍 Assignment Option 1: Historical Locations</h3>
+                <p>Find <strong>FIVE pictures</strong> of Mike Nagle at different historical locations which relate to important events covered in class.</p>
+                
+                <div class="requirements">
+                    <h4>Requirements for each photo:</h4>
+                    <ul>
+                        <li>Identify the <strong>number</strong> of the picture</li>
+                        <li>Identify the <strong>location</strong> where the picture was taken</li>
+                        <li>Relate this historical location to <strong>events covered in class</strong></li>
+                        <li>Share your thoughts on the assignment</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="option2" class="assignment-option">
+                <h3>🏛️ Assignment Option 2: Michigan Photos</h3>
+                <p>Find <strong>FIVE pictures</strong> of Mike Nagle speaking with elected officials from Michigan.</p>
+                
+                <div class="requirements">
+                    <h4>Requirements:</h4>
+                    <ul>
+                        <li>At least <strong>two must be Democrats</strong></li>
+                        <li>At least <strong>two must be Republicans</strong></li>
+                        <li>Some are currently in office, others have retired or lost re-election</li>
+                        <li>Identify the picture <strong>number</strong></li>
+                        <li>Identify the official's <strong>first and last name</strong></li>
+                        <li>Identify where that official <strong>lives</strong></li>
+                        <li>Share your thoughts on the assignment</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="instructions-highlight">
+                <strong>📤 CANVAS SUBMISSION REMINDER:</strong> This extra credit assignment must be submitted through Canvas for full credit. While you can also email or bring to class as backup options, Canvas submission ensures proper tracking and grading.<br><br>
+                <strong>Due Date:</strong> No later than the date of the final exam<br>
+                <strong>Primary Submission Method:</strong> Upload your completed document to Canvas<br>
+                <strong>Backup Options:</strong> Email or bring to class if Canvas is unavailable
+            </div>
+
+
+
+            <div class="selection-counter">
+                Selected Images: <span id="selectedCount">0</span> / 5
+            </div>
+
+            <div class="image-gallery">
+                <div class="gallery-header">
+                    <h3>Photo Gallery (308 Images)</h3>
+                    <div class="gallery-controls">
+                        <input type="text" class="search-box" placeholder="Search #..." onkeyup="searchImages(this.value)">
+                        <div class="view-toggle">
+                            <button class="view-btn active" onclick="toggleView('small')">Small</button>
+                            <button class="view-btn" onclick="toggleView('large')">Large</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="image-grid" id="imageGrid">
+                    <!-- Images will be generated by JavaScript -->
+                </div>
+
+                <div class="selected-images">
+                    <h4>Your Selected Images:</h4>
+                    <div class="selected-list" id="selectedList">
+                        <span style="color: #999; font-style: italic;">No images selected yet</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="submission-section">
+                <h3>📝 Ready to Submit?</h3>
+                <div style="background: #e3f2fd; border: 2px solid #1976d2; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                    <h4 style="color: #1976d2; margin-bottom: 10px;">🎯 CANVAS SUBMISSION REQUIRED</h4>
+                    <p style="margin-bottom: 10px;"><strong>Primary:</strong> Upload your completed document to Canvas assignments</p>
+                    <p style="margin-bottom: 10px;"><strong>Backup:</strong> Email or bring to class only if Canvas is unavailable</p>
+                    <p style="color: #1976d2; font-weight: bold;">Canvas submission ensures proper tracking and full credit!</p>
+                </div>
+                <p>Once you've selected your 5 images, choose your preferred format for the submission template. You can download as a Word document, copy text for Google Docs, or get a simple text file.</p>
+                <button class="submit-btn" onclick="prepareSubmission()" id="submitBtn" disabled>Choose Submission Format</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedImages = [];
+        let currentTab = 'option1';
+
+        // Configuration: Set your image source here
+        const IMAGE_CONFIG = {
+            // Option 1: If you have a folder of images in Canvas Files
+            useCanvasFiles: false,
+            canvasFilesPath: '/courses/YOUR_COURSE_ID/files/nagle_images/',
+            
+            // Option 2: If you have images hosted elsewhere
+            useExternalHost: false,
+            externalHostBase: 'https://your-server.com/nagle_images/',
+            
+            // Option 3: If you want to manually specify image URLs
+            useCustomUrls: true,  
+            customUrls: {
+                1: 'https://i.imgur.com/fVWslsT.jpg',
+                // Add more images as you get their links...
+                // 2: 'https://i.imgur.com/ANOTHER_ID.jpg',
+                // 3: 'https://i.imgur.com/ANOTHER_ID.jpg',
+            },
+            
+            // Image file extension (if using Canvas Files or External Host)
+            imageExtension: ''  
+        };
+
+        // Initialize the gallery
+        function initializeGallery() {
+            const grid = document.getElementById('imageGrid');
+            grid.innerHTML = '';
+            
+            for (let i = 1; i <= 308; i++) {
+                const imageItem = document.createElement('div');
+                imageItem.className = 'image-item';
+                imageItem.onclick = () => toggleSelection(i);
+                
+                const imageContent = createImageElement(i);
+                
+                imageItem.innerHTML = `
+                    ${imageContent}
+                    <div class="image-number">${i}</div>
+                `;
+                
+                grid.appendChild(imageItem);
+            }
+        }
+
+        function createImageElement(imageNumber) {
+            let imageSrc = '';
+            
+            if (IMAGE_CONFIG.useCanvasFiles) {
+                imageSrc = `${IMAGE_CONFIG.canvasFilesPath}image${imageNumber}${IMAGE_CONFIG.imageExtension}`;
+            } else if (IMAGE_CONFIG.useExternalHost) {
+                imageSrc = `${IMAGE_CONFIG.externalHostBase}image${imageNumber}${IMAGE_CONFIG.imageExtension}`;
+            } else if (IMAGE_CONFIG.useCustomUrls && IMAGE_CONFIG.customUrls[imageNumber]) {
+                imageSrc = IMAGE_CONFIG.customUrls[imageNumber];
+            }
+            
+            if (imageSrc) {
+                return `<img src="${imageSrc}" alt="Nagle Image ${imageNumber}" class="actual-image" 
+                        onerror="this.parentNode.innerHTML='<div class=\\'image-error\\'>Image ${imageNumber}<br>Not Found</div><div class=\\'image-number\\'>${imageNumber}</div>'">`;
+            } else {
+                return `<div class="image-placeholder">Image ${imageNumber}<br><small>Configure image source</small></div>`;
+            }
+        }
+
+        function switchTab(tabId) {
+            currentTab = tabId;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.assignment-option').forEach(option => option.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            
+            // Reset selections when switching tabs
+            selectedImages = [];
+            updateSelectionDisplay();
+        }
+
+        function toggleSelection(imageNumber) {
+            const index = selectedImages.indexOf(imageNumber);
+            
+            if (index > -1) {
+                // Remove from selection
+                selectedImages.splice(index, 1);
+            } else {
+                // Add to selection (max 5)
+                if (selectedImages.length < 5) {
+                    selectedImages.push(imageNumber);
+                } else {
+                    alert('You can only select 5 images maximum!');
+                    return;
+                }
+            }
+            
+            updateSelectionDisplay();
+        }
+
+        function updateSelectionDisplay() {
+            // Update counter
+            document.getElementById('selectedCount').textContent = selectedImages.length;
+            
+            // Update visual selection in grid
+            document.querySelectorAll('.image-item').forEach((item, index) => {
+                if (selectedImages.includes(index + 1)) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+            
+            // Update selected list
+            const selectedList = document.getElementById('selectedList');
+            if (selectedImages.length === 0) {
+                selectedList.innerHTML = '<span style="color: #999; font-style: italic;">No images selected yet</span>';
+            } else {
+                selectedList.innerHTML = selectedImages
+                    .sort((a, b) => a - b)
+                    .map(num => `<span class="selected-tag">Image ${num} <span class="remove-selected" onclick="toggleSelection(${num})">×</span></span>`)
+                    .join('');
+            }
+            
+            // Update submit button
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = selectedImages.length !== 5;
+        }
+
+        function searchImages(searchTerm) {
+            const items = document.querySelectorAll('.image-item');
+            items.forEach((item, index) => {
+                const imageNumber = index + 1;
+                if (searchTerm === '' || imageNumber.toString().includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        function toggleView(size) {
+            const grid = document.getElementById('imageGrid');
+            const buttons = document.querySelectorAll('.view-btn');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (size === 'large') {
+                grid.classList.add('large');
+            } else {
+                grid.classList.remove('large');
+            }
+        }
+
+        function prepareSubmission() {
+            if (selectedImages.length !== 5) {
+                alert('Please select exactly 5 images before generating the submission template.');
+                return;
+            }
+
+            // Show format selection modal
+            showFormatSelection();
+        }
+
+        function showFormatSelection() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+            `;
+
+            modal.innerHTML = `
+                <div style="
+                    background: white;
+                    padding: 30px;
+                    border-radius: 12px;
+                    max-width: 400px;
+                    width: 90%;
+                    text-align: center;
+                    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+                ">
+                    <h3 style="color: #667eea; margin-bottom: 20px;">Choose Download Format</h3>
+                    <p style="margin-bottom: 25px; color: #666;">Select your preferred format for the submission template:</p>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <button onclick="downloadWordDoc()" style="
+                            background: #2b579a;
+                            color: white;
+                            padding: 12px 20px;
+                            border: none;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            font-size: 1rem;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 10px;
+                        ">
+                            📄 Microsoft Word (.docx)
+                        </button>
+                        
+                        <button onclick="openGoogleDoc()" style="
+                            background: #1a73e8;
+                            color: white;
+                            padding: 12px 20px;
+                            border: none;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            font-size: 1rem;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 10px;
+                        ">
+                            📝 Google Docs (Copy Text)
+                        </button>
+                        
+                        <button onclick="downloadTextFile()" style="
+                            background: #666;
+                            color: white;
+                            padding: 12px 20px;
+                            border: none;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            font-size: 1rem;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 10px;
+                        ">
+                            📋 Text File (.txt)
+                        </button>
+                    </div>
+                    
+                    <button onclick="closeModal()" style="
+                        background: none;
+                        border: 1px solid #ddd;
+                        padding: 8px 16px;
+                        border-radius: 4px;
+                        margin-top: 20px;
+                        cursor: pointer;
+                        color: #666;
+                    ">
+                        Cancel
+                    </button>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+            window.currentModal = modal;
+        }
+
+        function closeModal() {
+            if (window.currentModal) {
+                document.body.removeChild(window.currentModal);
+                window.currentModal = null;
+            }
+        }
+
+        function generateTemplateContent() {
+            const assignment = currentTab === 'option1' ? 'Historical Locations' : 'Michigan Officials';
+            const sortedImages = selectedImages.sort((a, b) => a - b);
+            
+            let content = {
+                title: "WHERE'S NAGLE EXTRA CREDIT SUBMISSION",
+                assignment: assignment,
+                selectedImages: sortedImages.join(', '),
+                sections: []
+            };
+            
+            if (currentTab === 'option1') {
+                content.sections.push({
+                    title: "HISTORICAL LOCATIONS ANALYSIS:",
+                    items: sortedImages.map(num => ({
+                        title: `Image ${num}:`,
+                        fields: [
+                            "Location: [Enter the historical location here]",
+                            "Historical Event/Connection: [Explain how this location relates to events covered in class]",
+                            "Analysis: [Your detailed explanation]"
+                        ]
+                    }))
+                });
+            } else {
+                content.sections.push({
+                    title: "MICHIGAN OFFICIALS ANALYSIS:",
+                    items: sortedImages.map(num => ({
+                        title: `Image ${num}:`,
+                        fields: [
+                            "Official Name: [First and Last Name]",
+                            "Party: [Democrat/Republican]",
+                            "Where they live: [Location]",
+                            "Current Status: [In office/Retired/Lost re-election]"
+                        ]
+                    }))
+                });
+            }
+            
+            content.sections.push({
+                title: "REFLECTION:",
+                items: [{
+                    fields: [
+                        "What did you think of this assignment? [Your thoughts]",
+                        "Was it fun, dumb, too easy, too hard? [Your opinion]",
+                        "Suggestions for future assignments? [Your ideas]",
+                        "Any other thoughts? [Additional comments]"
+                    ]
+                }]
+            });
+            
+            return content;
+        }
+
+        function downloadWordDoc() {
+            const content = generateTemplateContent();
+            const assignment = currentTab === 'option1' ? 'Historical_Locations' : 'Michigan_Officials';
+            
+            // Create WCAG-compliant Word document content using HTML with proper semantic structure
+            let htmlContent = `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="utf-8">
+                    <title>Where's Nagle Extra Credit Submission Template</title>
+                    <style>
+                        body { 
+                            font-family: 'Times New Roman', serif; 
+                            line-height: 1.8; 
+                            margin: 1in; 
+                            color: #000000;
+                            font-size: 12pt;
+                        }
+                        h1 { 
+                            text-align: center; 
+                            color: #000000; 
+                            font-size: 18pt; 
+                            margin-bottom: 24pt;
+                            font-weight: bold;
+                        }
+                        h2 { 
+                            color: #000000; 
+                            font-size: 14pt; 
+                            margin-top: 24pt; 
+                            margin-bottom: 12pt;
+                            font-weight: bold;
+                        }
+                        h3 { 
+                            color: #000000; 
+                            font-size: 12pt; 
+                            margin-top: 18pt; 
+                            margin-bottom: 6pt;
+                            font-weight: bold;
+                        }
+                        p { 
+                            margin-bottom: 12pt; 
+                            font-size: 12pt;
+                        }
+                        .info-section { 
+                            margin-bottom: 24pt;
+                            padding: 12pt;
+                            border: 1pt solid #000000;
+                        }
+                        .info-line { 
+                            margin-bottom: 12pt; 
+                            font-weight: bold;
+                            font-size: 12pt;
+                        }
+                        .response-field { 
+                            margin-left: 24pt; 
+                            margin-bottom: 18pt;
+                            font-size: 12pt;
+                            line-height: 2.0;
+                        }
+                        .fill-in-line {
+                            display: inline-block;
+                            width: 200pt;
+                            border-bottom: 1pt solid #000000;
+                            margin-left: 6pt;
+                            margin-right: 6pt;
+                        }
+                        .page-break { 
+                            page-break-before: always; 
+                        }
+                        ul {
+                            list-style-type: disc;
+                            margin-left: 24pt;
+                        }
+                        li {
+                            margin-bottom: 6pt;
+                            line-height: 1.8;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <header>
+                        <h1>${content.title}</h1>
+                    </header>
+                    
+                    <section class="info-section" role="complementary" aria-label="Assignment Information">
+                        <h2>Assignment Information</h2>
+                        <p class="info-line">Assignment Type: ${content.assignment}</p>
+                        <p class="info-line">Selected Images: ${content.selectedImages}</p>
+                        <p class="info-line">Student Name: <span class="fill-in-line" aria-label="Fill in your name"></span></p>
+                        <p class="info-line">Date: <span class="fill-in-line" aria-label="Fill in the date"></span></p>
+                        <p class="info-line">Course: <span class="fill-in-line" aria-label="Fill in your course name"></span></p>
+                    </section>
+                    
+                    <main role="main">
+            `;
+            
+            content.sections.forEach((section, sectionIndex) => {
+                htmlContent += `<section aria-label="${section.title}" role="region">`;
+                htmlContent += `<h2>${section.title}</h2>`;
+                
+                section.items.forEach((item, itemIndex) => {
+                    if (item.title) {
+                        htmlContent += `<h3>${item.title}</h3>`;
+                    }
+                    
+                    htmlContent += '<ul role="list">';
+                    item.fields.forEach((field, fieldIndex) => {
+                        const fieldId = `field_${sectionIndex}_${itemIndex}_${fieldIndex}`;
+                        htmlContent += `<li role="listitem" id="${fieldId}">`;
+                        htmlContent += `<strong>${field.split(':')[0]}:</strong>`;
+                        if (field.includes('[') && field.includes(']')) {
+                            const instruction = field.match(/\[([^\]]+)\]/)[1];
+                            htmlContent += `<div class="response-field" aria-label="Response area for ${field.split(':')[0]}">`;
+                            htmlContent += `<em>Instructions: ${instruction}</em><br><br>`;
+                            htmlContent += `<span aria-label="Your response here">Your response:</span><br>`;
+                            htmlContent += `<span style="display: block; height: 60pt; border: 1pt solid #cccccc; background-color: #f9f9f9;" aria-label="Text input area"></span>`;
+                            htmlContent += `</div>`;
+                        }
+                        htmlContent += '</li>';
+                    });
+                    htmlContent += '</ul><br>';
+                });
+                htmlContent += '</section>';
+            });
+            
+            htmlContent += `
+                    </main>
+                    
+                    <footer role="contentinfo" style="margin-top: 48pt; padding-top: 24pt; border-top: 1pt solid #000000;">
+                        <div style="background-color: #e3f2fd; border: 2pt solid #1976d2; padding: 12pt; margin-bottom: 24pt; border-radius: 6pt;">
+                            <p style="font-weight: bold; font-size: 14pt; color: #1976d2; margin-bottom: 6pt;">📤 CANVAS SUBMISSION REQUIRED</p>
+                            <p style="margin-bottom: 6pt;"><strong>Primary Method:</strong> Upload this completed document to Canvas assignments</p>
+                            <p style="margin-bottom: 6pt;"><strong>Backup Options:</strong> Email or bring to class only if Canvas is unavailable</p>
+                            <p style="font-weight: bold; color: #1976d2;">Canvas submission ensures proper tracking and full credit!</p>
+                        </div>
+                        
+                        <p><strong>Submission Instructions:</strong></p>
+                        <ul>
+                            <li>Complete all response areas above</li>
+                            <li>Save this document with your name in the filename</li>
+                            <li><strong>SUBMIT THROUGH CANVAS ASSIGNMENTS for full credit</strong></li>
+                            <li>Due no later than the date of the final exam</li>
+                        </ul>
+                        <p><em>This document is formatted for accessibility and screen reader compatibility.</em></p>
+                    </footer>
+                </body>
+                </html>
+            `;
+            
+            // Create blob and download
+            const blob = new Blob([htmlContent], { 
+                type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Wheres_Nagle_Submission_${assignment}.doc`;
+            a.setAttribute('aria-label', 'Download accessible Word document template');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            closeModal();
+            alert(`Accessible Word document downloaded! 
+
+📤 IMPORTANT REMINDER: Submit through Canvas for full credit!
+
+This document includes proper headings, semantic structure, and screen reader labels for full accessibility.
+
+SUBMISSION STEPS:
+1. Complete the downloaded document
+2. Save with your name in the filename  
+3. Upload to Canvas Assignments (primary method)
+4. Email/bring to class only as backup if Canvas unavailable
+
+Canvas submission ensures proper tracking and grading!`);
+        }
+
+        function openGoogleDoc() {
+            const content = generateTemplateContent();
+            
+            // Create WCAG-compliant text for Google Docs with proper structure
+            let googleDocText = `WHERE'S NAGLE EXTRA CREDIT SUBMISSION TEMPLATE\n\n`;
+            
+            // Assignment Information Section
+            googleDocText += `ASSIGNMENT INFORMATION\n`;
+            googleDocText += `========================\n\n`;
+            googleDocText += `Assignment Type: ${content.assignment}\n`;
+            googleDocText += `Selected Images: ${content.selectedImages}\n`;
+            googleDocText += `Student Name: [Fill in your name]\n`;
+            googleDocText += `Date: [Fill in the date]\n`;
+            googleDocText += `Course: [Fill in your course name]\n\n`;
+            
+            // Content sections with proper structure
+            content.sections.forEach((section, sectionIndex) => {
+                googleDocText += `${section.title}\n`;
+                googleDocText += `${'='.repeat(section.title.length)}\n\n`;
+                
+                section.items.forEach((item, itemIndex) => {
+                    if (item.title) {
+                        googleDocText += `${item.title}\n`;
+                        googleDocText += `${'-'.repeat(item.title.length)}\n`;
+                    }
+                    
+                    item.fields.forEach((field, fieldIndex) => {
+                        const fieldParts = field.split(':');
+                        const fieldName = fieldParts[0];
+                        const instruction = field.match(/\[([^\]]+)\]/) ? field.match(/\[([^\]]+)\]/)[1] : '';
+                        
+                        googleDocText += `\n${fieldName}:\n`;
+                        if (instruction) {
+                            googleDocText += `Instructions: ${instruction}\n`;
+                        }
+                        googleDocText += `Your response: \n`;
+                        googleDocText += `\n\n[Please write your response above this line]\n`;
+                        googleDocText += `${'-'.repeat(50)}\n`;
+                    });
+                    googleDocText += '\n';
+                });
+                googleDocText += '\n';
+            });
+            
+            // Footer with submission instructions
+            googleDocText += `📤 CANVAS SUBMISSION REQUIRED\n`;
+            googleDocText += `=============================\n\n`;
+            googleDocText += `PRIMARY METHOD: Upload this completed document to Canvas assignments\n`;
+            googleDocText += `BACKUP OPTIONS: Email or bring to class only if Canvas is unavailable\n`;
+            googleDocText += `Canvas submission ensures proper tracking and full credit!\n\n`;
+            
+            googleDocText += `SUBMISSION INSTRUCTIONS\n`;
+            googleDocText += `======================\n\n`;
+            googleDocText += `1. Complete all response areas above\n`;
+            googleDocText += `2. Use proper headings and formatting in Google Docs\n`;
+            googleDocText += `3. Save with a descriptive filename including your name\n`;
+            googleDocText += `4. SUBMIT THROUGH CANVAS ASSIGNMENTS for full credit\n`;
+            googleDocText += `5. Due no later than the date of the final exam\n\n`;
+            
+            googleDocText += `ACCESSIBILITY NOTE:\n`;
+            googleDocText += `This template is designed to be screen reader friendly. `;
+            googleDocText += `Use Google Docs' built-in heading styles (Heading 1, Heading 2, etc.) `;
+            googleDocText += `to maintain proper document structure for accessibility.\n\n`;
+            
+            googleDocText += `GOOGLE DOCS ACCESSIBILITY TIPS:\n`;
+            googleDocText += `- Use Format > Paragraph styles > Heading 1 for main sections\n`;
+            googleDocText += `- Use Format > Paragraph styles > Heading 2 for subsections\n`;
+            googleDocText += `- Use Format > Paragraph styles > Normal text for responses\n`;
+            googleDocText += `- Check Tools > Accessibility to review your document\n`;
+            
+            // Copy to clipboard with error handling
+            navigator.clipboard.writeText(googleDocText).then(() => {
+                closeModal();
+                alert(`Accessible template copied to clipboard! 
+
+📤 CANVAS SUBMISSION REMINDER: Upload your completed document to Canvas Assignments for full credit!
+
+NEXT STEPS:
+1. A new Google Docs tab will open
+2. Paste the template (Ctrl+V or Cmd+V)
+3. Apply proper heading styles for accessibility:
+   - Select main section titles and apply "Heading 1"
+   - Select subsection titles and apply "Heading 2"
+4. Use Tools > Accessibility in Google Docs to check accessibility
+5. Complete your responses
+6. SUBMIT THROUGH CANVAS ASSIGNMENTS (not just email/print)
+
+Canvas submission ensures proper tracking and full credit!`);
+                
+                // Open Google Docs in new tab with instructions for accessibility
+                const googleDocsUrl = 'https://docs.google.com/document/create';
+                window.open(googleDocsUrl, '_blank', 'noopener,noreferrer');
+            }).catch(() => {
+                // Fallback if clipboard API fails
+                const textarea = document.createElement('textarea');
+                textarea.value = googleDocText;
+                textarea.style.position = 'fixed';
+                textarea.style.left = '-999999px';
+                textarea.setAttribute('aria-label', 'Template text for copying');
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    closeModal();
+                    alert('Accessible template copied! Go to docs.google.com, create a new document, and paste. Remember to apply proper heading styles for accessibility.');
+                    window.open('https://docs.google.com/document/create', '_blank', 'noopener,noreferrer');
+                } catch (err) {
+                    alert('Copy failed. Please try the Word document or text file option instead.');
+                }
+                
+                document.body.removeChild(textarea);
+            });
+        }
+
+        function downloadTextFile() {
+            const content = generateTemplateContent();
+            const assignment = currentTab === 'option1' ? 'Historical_Locations' : 'Michigan_Officials';
+            
+            let template = `${content.title}\n`;
+            template += `Assignment: ${content.assignment}\n`;
+            template += `Selected Images: ${content.selectedImages}\n\n`;
+            
+            content.sections.forEach(section => {
+                template += `${section.title}\n\n`;
+                section.items.forEach(item => {
+                    if (item.title) {
+                        template += `${item.title}\n`;
+                    }
+                    item.fields.forEach(field => {
+                        template += `- ${field}\n`;
+                    });
+                    template += '\n';
+                });
+            });
+
+            const blob = new Blob([template], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `wheres_nagle_submission_template_${assignment}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            closeModal();
+            alert('Text template downloaded!');
+        }
+
+        // Initialize the gallery when page loads
+        window.onload = function() {
+            initializeGallery();
+            updateSelectionDisplay();
+        };
+    </script>
+</body>
+</html>
